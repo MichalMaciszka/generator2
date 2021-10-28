@@ -1,4 +1,5 @@
 import copy
+from shutil import copyfile
 
 import pandas as pd
 import numpy as np
@@ -35,19 +36,19 @@ def updateCSV(rows, filename):
         write.writerows(rows)
 
 def process_cars():
-    ids = pd.read_csv("cars_EXCEL_data", usecols=["ID"])["ID"].tolist()
-    makes = pd.read_csv("cars_EXCEL_data", usecols=["Marka"])["Marka"].tolist()
-    models = pd.read_csv("cars_EXCEL_data", usecols=["Model"])["Model"].tolist()
-    registers = pd.read_csv("cars_EXCEL_data", usecols=["Rejestracja"])["Rejestracja"].tolist()
-    vins = pd.read_csv("cars_EXCEL_data", usecols=["Nr_VIN"])["Nr_VIN"].tolist()
-    years = pd.read_csv("cars_EXCEL_data", usecols=["Rocznik"])["Rocznik"].tolist()
-    engines = pd.read_csv("cars_EXCEL_data", usecols=["Silnik"])["Silnik"].tolist()
-    bought_dates = pd.read_csv("cars_EXCEL_data", usecols=["Data_zakupu"])["Data_zakupu"].tolist()
-    start_kms = pd.read_csv("cars_EXCEL_data", usecols=["Licznik_poczatkowy"])["Licznik_poczatkowy"].tolist()
-    current_kms = pd.read_csv("cars_EXCEL_data", usecols=["Licznik_obecny"])["Licznik_obecny"].tolist()
-    last_check_dates = pd.read_csv("cars_EXCEL_data", usecols=["Data_ostatniego_przegladu"])["Data_ostatniego_przegladu"].tolist()
-    if_accident = pd.read_csv("cars_EXCEL_data", usecols=["Czy_powypadkowy"])["Czy_powypadkowy"].tolist()
-    last_trips = pd.read_csv("cars_EXCEL_data", usecols=["Ostatnia trasa"])["Ostatnia trasa"].tolist()
+    ids = pd.read_csv("cars_EXCEL_data_t1", usecols=["ID"])["ID"].tolist()
+    makes = pd.read_csv("cars_EXCEL_data_t1", usecols=["Marka"])["Marka"].tolist()
+    models = pd.read_csv("cars_EXCEL_data_t1", usecols=["Model"])["Model"].tolist()
+    registers = pd.read_csv("cars_EXCEL_data_t1", usecols=["Rejestracja"])["Rejestracja"].tolist()
+    vins = pd.read_csv("cars_EXCEL_data_t1", usecols=["Nr_VIN"])["Nr_VIN"].tolist()
+    years = pd.read_csv("cars_EXCEL_data_t1", usecols=["Rocznik"])["Rocznik"].tolist()
+    engines = pd.read_csv("cars_EXCEL_data_t1", usecols=["Silnik"])["Silnik"].tolist()
+    bought_dates = pd.read_csv("cars_EXCEL_data_t1", usecols=["Data_zakupu"])["Data_zakupu"].tolist()
+    start_kms = pd.read_csv("cars_EXCEL_data_t1", usecols=["Licznik_poczatkowy"])["Licznik_poczatkowy"].tolist()
+    current_kms = pd.read_csv("cars_EXCEL_data_t1", usecols=["Licznik_obecny"])["Licznik_obecny"].tolist()
+    last_check_dates = pd.read_csv("cars_EXCEL_data_t1", usecols=["Data_ostatniego_przegladu"])["Data_ostatniego_przegladu"].tolist()
+    if_accident = pd.read_csv("cars_EXCEL_data_t1", usecols=["Czy_powypadkowy"])["Czy_powypadkowy"].tolist()
+    last_trips = pd.read_csv("cars_EXCEL_data_t1", usecols=["Ostatnia trasa"])["Ostatnia trasa"].tolist()
 
     res = []
     for i in range(len(ids)):
@@ -80,22 +81,22 @@ fakePL = Faker("pl_PL")
 start = None
 end = None
 delta_t = 0
-if (os.path.isfile('./orders_data')):
+if (os.path.isfile('./orders_data_t1')):
     delta_t = 2
 else:
     delta_t = 1
 
 #opcja 1 okresu czasu, pierwszego ładowania - tworzenie struktur danych i plikow docelowych
 if delta_t == 1:
-    createCSV(["Imie", "Nazwisko", "Nr_telefonu", "PESEL"], "clients_data")
-    createCSV(["Imie", "Nazwisko", "PESEL", "Pensja"], "workers_data")
-    createCSV(["ID_Skarga", "Tresc", "Data_zlozenia"], "complaints_data")
-    createCSV(["Nr_vin", "Marka", "Model", "Rocznik"], "cars_DB_data")
-    createCSV(["ID_Naprawa", "Data_rozpoczecia", "Data_zakonczenia", "Opis", "Koszt", "Samochod_VIN"], "repairs_data")
-    createCSV(["ID_Zlecenie", "Data_rozpoczecia", "Data_zakonczenia", "Wartosc", "Klient_PESEL", "Samochod_VIN", "Mechanik_PESEL"], "orders_data")
+    createCSV(["Imie", "Nazwisko", "Nr_telefonu", "PESEL"], "clients_data_t1")
+    createCSV(["Imie", "Nazwisko", "PESEL", "Pensja"], "workers_data_t1")
+    createCSV(["ID_Skarga", "Tresc", "Data_zlozenia"], "complaints_data_t1")
+    createCSV(["Nr_vin", "Marka", "Model", "Rocznik"], "cars_DB_data_t1")
+    createCSV(["ID_Naprawa", "Data_rozpoczecia", "Data_zakonczenia", "Opis", "Koszt", "Samochod_VIN"], "repairs_data_t1")
+    createCSV(["ID_Zlecenie", "Data_rozpoczecia", "Data_zakonczenia", "Wartosc", "Klient_PESEL", "Samochod_VIN", "Mechanik_PESEL"], "orders_data_t1")
     createCSV(["ID", "Marka", "Model", "Nr_VIN", "Rejestracja", "Rocznik", "Silnik", "Data_zakupu", "Licznik_poczatkowy",
                "Licznik_obecny", "Data_ostatniego_przegladu", "Czy_powypadkowy", "Ostatnia trasa"
-               ], "cars_EXCEL_data")
+               ], "cars_EXCEL_data_t1")
 
     #ustawiamy czas od-do do generacji:
     start = datetime.date(2010, 1, 1) #y, m, d
@@ -116,32 +117,38 @@ if delta_t == 1:
     rep_counter = 0
 
 elif delta_t == 2:
-    fk_cli = pd.read_csv("clients_data", usecols=["PESEL"])["PESEL"].tolist()
-    fk_mech = pd.read_csv("workers_data", usecols=["PESEL"])["PESEL"].tolist()
+    fk_cli = pd.read_csv("clients_data_t1", usecols=["PESEL"])["PESEL"].tolist()
+    fk_mech = pd.read_csv("workers_data_t1", usecols=["PESEL"])["PESEL"].tolist()
     fkm_len = len(fk_mech)
     fkc_len = len(fk_cli)
-    orders_count = pd.read_csv("orders_data", usecols=["ID_Zlecenie"])["ID_Zlecenie"].size
+    orders_count = pd.read_csv("orders_data_t1", usecols=["ID_Zlecenie"])["ID_Zlecenie"].size
     orders_temp = []
-    complaints_count = pd.read_csv("complaints_data", usecols=["ID_Skarga"])["ID_Skarga"].size
+    complaints_count = pd.read_csv("complaints_data_t1", usecols=["ID_Skarga"])["ID_Skarga"].size
     complaints_temp = []
     last_called_client = fkc_len
     c_len = 0
     start = datetime.date(2015, 1, 1) #y, m, d
     end = datetime.date(2020, 12, 31)
     cars_info = process_cars()
-    rep_counter = len(pd.read_csv("repairs_data", usecols=["ID_Naprawa"])["ID_Naprawa"].tolist())
+    rep_counter = len(pd.read_csv("repairs_data_t1", usecols=["ID_Naprawa"])["ID_Naprawa"].tolist())
 
-    os.remove("cars_DB_data")
-    os.remove("cars_EXCEL_data")
-    createCSV(["Nr_vin", "Marka", "Model", "Rocznik"], "cars_DB_data")
+    copyfile("clients_data_t1", "clients_data_t2")
+    copyfile("complaints_data_t1", "complaints_data_t2")
+    copyfile("orders_data_t1", "orders_data_t2")
+    copyfile("repairs_data_t1", "repairs_data_t2")
+    copyfile("workers_data_t1", "workers_data_t2")
+
+    # os.remove("cars_DB_data")
+    # os.remove("cars_EXCEL_data")
+    createCSV(["Nr_vin", "Marka", "Model", "Rocznik"], "cars_DB_data_t2")
     createCSV(["ID", "Marka", "Model", "Nr_VIN", "Rejestracja", "Rocznik", "Silnik", "Data_zakupu", "Licznik_poczatkowy",
                "Licznik_obecny", "Data_ostatniego_przegladu", "Czy_powypadkowy", "Ostatnia trasa"
-               ], "cars_EXCEL_data")
+               ], "cars_EXCEL_data_t2")
 
 
 def create_repairs_for_month(current_date):
     global rep_counter
-    CHANCE = 10
+    CHANCE = 0.1
     rep = []
     for car in cars_info:
         r = rand.randint(0, 100)
@@ -161,7 +168,10 @@ def create_repairs_for_month(current_date):
             ]
             rep_counter += 1
             rep.append(tmp)
-    updateCSV(rep, "repairs_data")
+    if delta_t == 1:
+        updateCSV(rep, "repairs_data_t1")
+    else:
+        updateCSV(rep, "repairs_data_t2")
     return rep
 
 
@@ -182,8 +192,8 @@ def begin_generating(start, end, regs):
 #------------------------------------------------
 #ENTITY GENERATING FUNCTIONS:
 def pesels_from_file():
-    part1 = pd.read_csv("clients_data", usecols=["PESEL"])["PESEL"].tolist()
-    part2 = pd.read_csv("workers_data", usecols=["PESEL"])["PESEL"].tolist()
+    part1 = pd.read_csv("clients_data_t1", usecols=["PESEL"])["PESEL"].tolist()
+    part2 = pd.read_csv("workers_data_t1", usecols=["PESEL"])["PESEL"].tolist()
     res = []
     res.extend(part1)
     res.extend(part2)
@@ -246,7 +256,10 @@ def generate_clients(pesels, num):
         fk_cli.append(p)
         fkc_len += 1
         print("c: ", len(res))
-    updateCSV(res, "clients_data")
+    if delta_t == 1:
+        updateCSV(res, "clients_data_t1")
+    else:
+        updateCSV(res, "clients_data_t2")
 
 
 def generate_mechanics(pesels, num):
@@ -261,7 +274,10 @@ def generate_mechanics(pesels, num):
         fk_mech.append(p)
         fkm_len += 1
         print("m: ", len(res))
-    updateCSV(res, "workers_data")
+    if delta_t == 1:
+        updateCSV(res, "workers_data_t1")
+    else:
+        updateCSV(res, "workers_data_t2")
 
 
 def generate_new_cars(start, cars_bought, regs):
@@ -269,7 +285,7 @@ def generate_new_cars(start, cars_bought, regs):
     global cars_info
     #tyle zakupiono w danym miesiacu
     for n in range(0, cars_bought):
-        #rand ID - TODO: VIN & dane do excela!
+
         # id = 100000 + c_len + n
         id = c_len + n + 1
         # marka = "marka"
@@ -345,20 +361,39 @@ def generate_orders(start, orders_made):
             complaints_count += 1
         print("order generated: " + str(id))
 
-    updateCSV(orders_temp, "orders_data")
-    updateCSV(complaints_temp, "complaints_data")
+    if delta_t == 1:
+        updateCSV(orders_temp, "orders_data_t1")
+        updateCSV(complaints_temp, "complaints_data_t1")
+    else:
+        updateCSV(orders_temp, "orders_data_t2")
+        updateCSV(complaints_temp, "complaints_data_t2")
     orders_temp = []
     complaints_temp = []
 
+def search_by_vin(nr_vin):
+    for e in cars_info:
+        if e.vin == nr_vin:
+            return e
+    print("Not found")
+    return None
+
 if delta_t == 1:
-    pesels = generate_pesels(600)
+    pesels = generate_pesels(10000)
 else:
-    pesels = generate_pesels(600, pesels_from_file())
+    pesels = generate_pesels(10000, pesels_from_file())
 pesels = list(set(pesels))
-generate_clients(pesels, 200)
-generate_mechanics(pesels, 200)
-regs = generate_registrations(4000)
-generate_new_cars(start, 200, regs)
+
+if delta_t == 2:
+    upd_vin = input("Podaj numer vin samochodu, którego rocznik zmienisz: ")
+    upd = search_by_vin(upd_vin)
+    if upd is not None:
+        upd_year = int(input("Podaj nowy rocznik: "))
+        upd.year = upd_year
+
+generate_clients(pesels, 5000)
+generate_mechanics(pesels, 5000)
+regs = generate_registrations(10000)
+generate_new_cars(start, 1000, regs)
 begin_generating(start, end, regs)
 
 cars_db = []
@@ -368,5 +403,10 @@ for a in cars_info:
     cars_db.append(l1)
     l2 = a.excel_csv()
     cars_excel.append(l2)
-updateCSV(cars_db, "cars_DB_data")
-updateCSV(cars_excel, "cars_EXCEL_data")
+
+if delta_t == 1:
+    updateCSV(cars_db, "cars_DB_data_t1")
+    updateCSV(cars_excel, "cars_EXCEL_data_t1")
+else:
+    updateCSV(cars_excel, "cars_EXCEL_data_t2")
+    updateCSV(cars_db, "cars_DB_data_t2")
