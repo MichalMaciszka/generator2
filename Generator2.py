@@ -91,7 +91,7 @@ if delta_t == 1:
     createCSV(["Imie", "Nazwisko", "PESEL", "Pensja"], "workers_data")
     createCSV(["ID_Skarga", "Tresc", "Data_zlozenia"], "complaints_data")
     createCSV(["Nr_vin", "Marka", "Model", "Rocznik"], "cars_DB_data")
-    createCSV(["Data_rozpoczecia", "Data_zakonczenia", "Opis", "Koszt", "Samochod_VIN"], "repairs_data")
+    createCSV(["ID_Naprawa", "Data_rozpoczecia", "Data_zakonczenia", "Opis", "Koszt", "Samochod_VIN"], "repairs_data")
     createCSV(["ID_Zlecenie", "Data_rozpoczecia", "Data_zakonczenia", "Wartosc", "Klient_PESEL", "Samochod_VIN", "Mechanik_PESEL"], "orders_data")
     createCSV(["ID", "Marka", "Model", "Nr_VIN", "Rejestracja", "Rocznik", "Silnik", "Data_zakupu", "Licznik_poczatkowy",
                "Licznik_obecny", "Data_ostatniego_przegladu", "Czy_powypadkowy", "Ostatnia trasa"
@@ -113,6 +113,7 @@ if delta_t == 1:
     complaints_count = 0 # ilosc skarg
     complaints_temp = [] # tablica na przechowywanie skarg z 1 miesiaca
     last_called_client = 0 # ostatnio przypisany klient - potrzebne do zapewniania ze kazdy klient ma choc 1 zamowienie
+    rep_counter = 0
 
 elif delta_t == 2:
     fk_cli = pd.read_csv("clients_data", usecols=["PESEL"])["PESEL"].tolist()
@@ -128,6 +129,7 @@ elif delta_t == 2:
     start = datetime.date(2015, 1, 1) #y, m, d
     end = datetime.date(2020, 12, 31)
     cars_info = process_cars()
+    rep_counter = len(pd.read_csv("repairs_data", usecols=["ID_Naprawa"])["ID_Naprawa"].tolist())
 
     os.remove("cars_DB_data")
     os.remove("cars_EXCEL_data")
@@ -138,6 +140,7 @@ elif delta_t == 2:
 
 
 def create_repairs_for_month(current_date):
+    global rep_counter
     CHANCE = 10
     rep = []
     for car in cars_info:
@@ -149,12 +152,14 @@ def create_repairs_for_month(current_date):
             days = rand.randint(0, 9)
             end_date = start_date + datetime.timedelta(days=days)
             tmp = [
+                rep_counter + 1,
                 str(start_date.year) + '-' + str(start_date.month) + '-' + str(start_date.day),
                 str(end_date.year) + '-' + str(end_date.month) + '-' + str(end_date.day),
                 fake.text(max_nb_chars=100),
                 round(rand.uniform(100, 3000), 2),
                 car.vin
             ]
+            rep_counter += 1
             rep.append(tmp)
     updateCSV(rep, "repairs_data")
     return rep
@@ -200,12 +205,13 @@ def generate_pesels1(num):
 
 def generate_pesels2(num, pesels):
     x = set()
-    while len(x) < num:
-        p = fakePL.pesel()
-        if p not in pesels:
-            x.add(p)
+    for a in pesels:
+        x.add(a)
+    while len(x) < num + len(pesels):
+            x.add(fakePL.pesel())
+    for b in pesels:
+        x.remove(b)
     res = list(x)
-    res.extend(pesels)
     return res
 
 
@@ -332,7 +338,7 @@ def generate_orders(start, orders_made):
         #UPDATE CAR INFO
         auto.update_after_trip(data_kon)
         #dodanie gotowego zamowienia do temp listy
-        orders_temp.append([id, data_pocz, data_kon, wartosc, fk_klienta, fk_mechanika, auto.vin])
+        orders_temp.append([id, data_pocz, data_kon, wartosc, fk_klienta,auto.vin, fk_mechanika])
 
         if rand.random() < prawdopodobienstwo_skargi:
             complaints_temp.append([100000 + complaints_count, fake.text(max_nb_chars = 100), data_kon, id])
@@ -345,10 +351,10 @@ def generate_orders(start, orders_made):
     complaints_temp = []
 
 if delta_t == 1:
-    pesels = generate_pesels(400)
+    pesels = generate_pesels(600)
 else:
-    pesels = generate_pesels(400, pesels_from_file())
-print(pesels)
+    pesels = generate_pesels(600, pesels_from_file())
+pesels = list(set(pesels))
 generate_clients(pesels, 200)
 generate_mechanics(pesels, 200)
 regs = generate_registrations(4000)
